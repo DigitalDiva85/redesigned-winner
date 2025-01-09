@@ -1,0 +1,45 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+questions = [
+("Favorite type of activity", ["Indoor", "Outdoor"]),
+("Preferred weekend plan", ["Relaxing at home", "Going out", "A mix"]),
+("Communication style", ["Direct", "Indirect", "A mix"]),
+("Long-term goals", ["Family", "Career", "Travel", "Other"]),
+("Favorite cuisine", ["Italian", "Mexican", "Asian", "Other"]),
+("Ideal vacation", ["Beach", "Mountains", "City", "Countryside"])
+]
+
+@app.route('/compatibility-test', methods=['POST'])
+def compatibility_test():
+data = request.json
+participant_1 = data.get("participant_1")
+participant_2 = data.get("participant_2")
+
+if not participant_1 or not participant_2:
+return jsonify({"error": "Both participants' answers are required"}), 400
+
+# Compare answers and calculate compatibility score
+score = 0
+max_score = len(questions)
+for i in range(max_score):
+if participant_1[i] == participant_2[i]:
+score += 1
+
+compatibility_percentage = (score / max_score) * 100
+
+# Create results
+result_message = "You might need to explore each other's preferences more."
+if compatibility_percentage > 80:
+result_message = "Great match! You seem very compatible."
+elif compatibility_percentage > 50:
+result_message = "You have some common ground but might need to work on differences."
+
+return jsonify({
+"compatibility_percentage": compatibility_percentage,
+"message": result_message
+})
+
+if __name__ == '__main__':
+app.run(debug=True)
